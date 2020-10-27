@@ -1,0 +1,16 @@
+name: isis3-flask
+channels:
+  - usgs-astrogeology
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  - isis>=4.3.0
+  - pip
+  - six
+  - pysis>=0.6.4
+  - pip:
+      - flask
+      - boto3
+      - gunicorn
+      - flask-expects-json

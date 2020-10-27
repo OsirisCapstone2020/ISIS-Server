@@ -1,0 +1,8 @@
+[run]
+disable_warnings = no-data-collected
+data_file = .pytest_cache/.coverage
+source = isis3_flask
+omit = */__init__.py
+
+[report]
+show_missing = True
