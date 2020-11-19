@@ -22,7 +22,7 @@ and restart itself and run on port 8000 by default.
 If you make updates to [environment.yml](./environment.yml), you can update
 the .python directory to match by running:
 ```console
-$ conda env update -p .python -f environment.yml --prune
+$ conda env update -p ./.python -f environment.yml --prune
 $ pip install -r requirements.dev.txt
 ```
 
