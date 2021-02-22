@@ -1,3 +1,15 @@
+# turn dictionary into json
+    #  need to make json folder
+    # make sure there isn't duplicate files/already existing files when this is run
+    # make json per file
+    # make json overall
+# validate file inputs from n8n server (make another file for this)
+    # look at function name given, pull parameters and types from json
+    # compare file name (.cub, etc)
+    # make sure strings, ints, are used (how do you do this when python doesn't have types?????)
+
+
+
 # read line
 # if parameter in line
 	# split on =
@@ -49,11 +61,11 @@ def find_parameters(file):
             type = type_elements[1].replace("</type", "")
             
             # add parameter to dictionary
-            #parameters.add(parameter, type)
             parameters[parameter] = type
             
     file.close()
     print(parameters)
+    print(len(parameters))
     return parameters
     
 #find_files()
