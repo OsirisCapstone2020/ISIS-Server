@@ -14,30 +14,47 @@
 # to remove items, make a variable with all characters being removed, then put
 # this as the first parameter of replace
 
+import glob
+
+def find_files():
+    files = glob.glob('../xml/*.xml')
+    print(files)
+    
+    for file in files:
+        print(find_parameters(file))
+
 
 def find_parameters(file):
     parameters = {}
 
-    file = open(xml_file, "r")
+    file = open(file, "r")
     lines = file.readlines()
 
     number_of_lines = len(lines)
     for i in range(0, number_of_lines):
+        #elements = []
         line = lines[i]
-        if "parameter" in line:
+        if "parameter name" in line:
             # find the parameter
             parameter_elements = line.split("=")
-            parameter = elements[1].replace(">", "")
+            print(parameter_elements)
+            parameter_with_new_line = parameter_elements[1].replace(">", "")
+            parameter = parameter_with_new_line.replace("\n", "")
             
             # go to next line to find the type
-            i++
+            i += 1
             line = lines[i]
             type_elements = line.split(">")
-            type = elements[1].replace("</type", "")
+            print(type_elements)
+            type = type_elements[1].replace("</type", "")
             
             # add parameter to dictionary
-            parameters.add(parameter, type)
+            #parameters.add(parameter, type)
+            parameters[parameter] = type
             
     file.close()
     print(parameters)
     return parameters
+    
+#find_files()
+find_parameters("../xml/caminfo.xml")
