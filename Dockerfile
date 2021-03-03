@@ -1,14 +1,14 @@
-FROM continuumio/miniconda3
+FROM usgsastro/isis
 
-RUN conda update conda && \
-    conda install python=3.6 && \
-    conda config --add channels conda-forge && \
-    conda config --add channels usgs-astrogeology
+COPY . /app
 
-RUN conda install -c usgs-astrogeology isis
+RUN useradd -m -s /bin/bash appUser && \
+    chown -R appUser:appUser /app
 
-RUN apt-get update && \
-    apt-get install libgl1 -y && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+RUN conda env update -n base -f environment.yml && \
+    printf '#!/bin/bash\nconda activate base\n' > /etc/profile.d/isis.sh
 
-RUN bash -lc 'python "$CONDA_PREFIX/scripts/isisVarInit.py"'
+USER appUser
+ENTRYPOINT ["/bin/bash", "-lc"]
+CMD ["gunicorn -c gunicorn.conf.py isis_server:app"]
