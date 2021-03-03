@@ -1,7 +1,7 @@
 from tempfile import tempdir
 
 from flask import Flask, jsonify, request, make_response
-from .s3 import s3_download, s3_upload
+from .s3 import S3Client
 from .isis import lowpass, CMD_LOWPASS
 from .validator import REQUEST_SCHEMA
 from werkzeug.exceptions import BadRequest
@@ -27,6 +27,7 @@ def get_command_xml():
 
 # Create the APP
 app = Flask(__name__)
+app.s3_client = S3Client()
 app.isis_commands = get_command_xml()
 
 
@@ -43,7 +44,7 @@ def post_index():
     input_data = request.json
 
     # Download input
-    temp_in_file = s3_download(TEST_BUCKET, input_data["input_file"])
+    temp_in_file = app.s3_client.download(input_data["input_file"])
 
     in_file_name, in_file_ext = path.splitext(input_data["input_file"])
     out_obj_name = "{}.lowpass{}".format(in_file_name, in_file_ext)
@@ -60,7 +61,7 @@ def post_index():
         raise BadRequest("Command not found")
 
     # Upload output
-    upload_res = s3_upload(TEST_BUCKET, out_obj_full_path)
+    upload_res = app.s3_client.upload(TEST_BUCKET, out_obj_full_path)
 
     if path.exists(temp_in_file):
         file_remove(temp_in_file)

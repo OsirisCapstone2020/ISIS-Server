@@ -3,3 +3,4 @@
 **/*.pyc
 **/*.prt
 .idea/**
+.env

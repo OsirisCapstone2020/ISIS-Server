@@ -1,5 +1,19 @@
 # Flask server that runs ISIS commands
 
+## Environment
+Any environment variables without a default are required for the app to start
+
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| APP_LOG_LEVEL | A log level name (see [Python docs](https://docs.python.org/3/library/logging.html#logging-levels)) | "info" |
+| APP_PORT | The port that the app should run on | 8080 |
+| S3_SERVER | The URL of the S3 server that the app should use to store intermediate data | |
+| S3_BUCKET | The name of the S3 bucket that the app should use | |
+| S3_ACCESS_KEY | The access key for S3_BUCKET | |
+| S3_SECRET_KEY | The secret key for S3_BUCKET | |
+
+
+## Development
 1. Install [miniconda3](https://docs.conda.io/en/latest/miniconda.html)
 2. Install the project's dependencies into [.python](./.python)
    ```console
