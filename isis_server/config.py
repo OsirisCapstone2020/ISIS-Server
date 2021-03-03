@@ -12,7 +12,7 @@ def check_env_exists(env_var: str) -> str:
     """
     val = getenv(env_var)
     if val is None:
-        raise RuntimeError("'{}' is not defined!".format(val))
+        raise RuntimeError("'{}' is not set!".format(env_var))
     return val
 
 

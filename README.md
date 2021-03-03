@@ -12,6 +12,18 @@ Any environment variables without a default are required for the app to start
 | S3_ACCESS_KEY | The access key for S3_BUCKET | |
 | S3_SECRET_KEY | The secret key for S3_BUCKET | |
 
+These variables can be set directly from the CLI or in a .env file at the root
+of the app:
+```dotenv
+APP_LOG_LEVEL=debug
+APP_PORT=8080
+
+S3_SERVER=...
+S3_BUCKET=...
+S3_ACCESS_KEY=...
+S3_SECRET_KEY=...
+```
+
 
 ## Development
 1. Install [miniconda3](https://docs.conda.io/en/latest/miniconda.html)
