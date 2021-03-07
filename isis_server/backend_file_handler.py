@@ -58,9 +58,31 @@ def respond_to_n8n(img_file, bucket_name):
             url = s3_client.generate_presigned_url('get_object', params)
     
     # return formatted data
+        # return url
+        # return
+            ''' {
+            "type": "object",
+            "properties": {
+                "to": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+            }'''
+            
+    to_return_dict = {}
+    to_return_dict["type"] = url
     
+    error_return_dict = {}
+    error_return_dict["type"] = "string"
     
-    
-    
-    
+    properties_return_dict = {}
+    properties_return_dict["to"] = to_return_dict
+    properties_return_dict["error" = error_return_dict
+
+    return_dict = {}
+    return_dict["type"] = "object"
+    return_dict["properties"] = properties_return_dict
     
