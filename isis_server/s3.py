@@ -43,10 +43,17 @@ class S3Client:
         s3_logger.info(
             "Uploading {} to {}...".format(object_name, Config.s3.server)
         )
-        result = self.s3.upload_file(
+
+        self.s3.upload_file(
             file_path,
             Config.s3.bucket,
             object_name
         )
+
         s3_logger.info("Upload of {} complete.\n".format(file_path))
-        return result
+
+        return "{}/{}/{}".format(
+            Config.s3.server,
+            Config.s3.bucket,
+            object_name
+        )
