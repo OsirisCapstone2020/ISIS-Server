@@ -1,5 +1,4 @@
 from xml.etree import ElementTree
-from json import dumps
 
 
 class XMLReader:
@@ -9,10 +8,10 @@ class XMLReader:
         command_name = xml_tree.getroot().get("name")
         param_groups = xml_tree.find("groups").findall("group")
 
-        params = list()
+        params = dict()
         for group in list(param_groups):
             group_params = XMLReader._param_group_to_dict(group)
-            params.append(group_params)
+            params.update(group_params)
 
         return {
             "name": command_name,
@@ -41,4 +40,5 @@ class XMLReader:
                 "type": type,
                 "default": default
             }
+
         return current_group
