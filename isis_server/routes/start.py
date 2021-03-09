@@ -1,10 +1,9 @@
 from flask_expects_json import expects_json
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from os import remove as remove_file
 from requests import get as req_get
 from tempfile import NamedTemporaryFile
 
-from ..app import app
 from ..logger import get_logger
 
 CMD_NAME = "start"
@@ -38,7 +37,6 @@ def download(url):
         return temp_file.name
 
 
-@app.route(["/{}".format(CMD_NAME)], methods=["POST"])
 @expects_json(START_SCHEMA)
 def post_start():
     input_file = request.json["from"]
@@ -50,8 +48,11 @@ def post_start():
     try:
         # Download the file to a temp file, upload it to S3, delete the
         # temp file
+        logger.debug("Downloading {}...".format(input_file))
         temp_file = download(input_file)
-        output_file = app.s3.upload(temp_file)
+        logger.debug("{} downloaded to {}".format(input_file, temp_file))
+
+        output_file = current_app.s3_client.upload(temp_file)
         remove_file(temp_file)
 
     except Exception as e:

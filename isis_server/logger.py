@@ -6,3 +6,4 @@ def get_logger(label: str):
     isis_logger = getLogger(label)
     isis_logger.setLevel(DEBUG)
     isis_logger.addHandler(StreamHandler(stdout))
+    return isis_logger

@@ -1,8 +1,8 @@
 from flask_expects_json import expects_json
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 
 from ..logger import getLogger
-from ..app import app
+
 from pysis import isis
 from pysis.exceptions import ProcessError
 
@@ -26,7 +26,6 @@ SPICE_INIT_SCHEMA = {
 logger = getLogger(CMD_NAME)
 
 
-@app.route("/{}".format(CMD_NAME), methods=["POST"])
 @expects_json(SPICE_INIT_SCHEMA)
 def post_spiceinit():
     """
@@ -41,7 +40,7 @@ def post_spiceinit():
     error = None
 
     try:
-        input_file = app.s3.download(request.json["from"])
+        input_file = current_app.s3_client.download(request.json["from"])
         web = request.json["args"]["web"]
 
         isis.spiceinit(from_=input_file, web=web)

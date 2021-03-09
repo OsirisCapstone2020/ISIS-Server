@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, request, make_response
+from flask import Flask
+
+from .routes import post_start, post_spiceinit, get_all_commands, get_command
 from .s3 import S3Client
 from os import path, listdir
 
@@ -19,26 +21,19 @@ def get_command_xml():
     return [XMLReader.get_isis_command(f) for f in all_files]
 
 
-# Create the APP
+# Create the app
 app = Flask(__name__)
 app.s3_client = S3Client()
 app.isis_commands = get_command_xml()
 
-
 # ===========
 # App routes
-# Other commands can be found in ./routes
 # ===========
 
-@app.route("/commands", methods=["GET"])
-def get_all_commands():
-    return jsonify(app.isis_commands)
+# Add xml routes
+app.add_url_rule('/commands/<command_name>', 'single_command', get_command, methods=["GET"])
+app.add_url_rule('/commands', 'commands', get_all_commands, methods=["GET"])
 
-
-@app.route("/commands/<command_name>", methods=["GET"])
-def get_command(command_name):
-    for command in app.isis_commands:
-        if command["name"] == command_name:
-            return jsonify(command)
-
-    return make_response(jsonify(), 404)
+# Add n8n node routes
+app.add_url_rule('/start', 'start', post_start, methods=["POST"])
+app.add_url_rule('/spiceinit', 'spiceinit', post_spiceinit, methods=["POST"])
