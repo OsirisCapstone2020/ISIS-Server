@@ -1,12 +1,6 @@
-from tempfile import tempdir
-
 from flask import Flask, jsonify, request, make_response
 from .s3 import S3Client
-from .isis import lowpass, CMD_LOWPASS
-from .validator import REQUEST_SCHEMA
-from werkzeug.exceptions import BadRequest
-from os import path, listdir, remove as file_remove
-from flask_expects_json import expects_json
+from os import path, listdir
 
 from .xml_reader import XMLReader
 
@@ -33,44 +27,8 @@ app.isis_commands = get_command_xml()
 
 # ===========
 # App routes
+# Other commands can be found in ./routes
 # ===========
-
-@app.route("/", methods=["POST"])
-@expects_json(REQUEST_SCHEMA)
-def post_index():
-    """
-    Called when a user POSTs to /
-    """
-    input_data = request.json
-
-    # Download input
-    temp_in_file = app.s3_client.download(input_data["input_file"])
-
-    in_file_name, in_file_ext = path.splitext(input_data["input_file"])
-    out_obj_name = "{}.lowpass{}".format(in_file_name, in_file_ext)
-    out_obj_full_path = path.join(
-        tempdir,
-        out_obj_name
-    )
-
-    # Run ISIS
-    # TODO: Better design than if statements
-    if input_data["cmd"] == CMD_LOWPASS:
-        lowpass(temp_in_file, out_obj_full_path)
-    else:
-        raise BadRequest("Command not found")
-
-    # Upload output
-    upload_res = app.s3_client.upload(TEST_BUCKET, out_obj_full_path)
-
-    if path.exists(temp_in_file):
-        file_remove(temp_in_file)
-
-    if path.exists(out_obj_full_path):
-        file_remove(out_obj_full_path)
-
-    return jsonify({"output": out_obj_name})
-
 
 @app.route("/commands", methods=["GET"])
 def get_all_commands():
