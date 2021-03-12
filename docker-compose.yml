@@ -12,11 +12,11 @@ services:
     volumes: ["./data:/data"]
     ports: ["9000:9000"]
 
-#  isis_server:
-#    build: .
-#    image: isis-server
-#    container_name: isis-server
-#    command: "bash -lc '.python/bin/python .python/bin/gunicorn -c gunicorn.conf.py --reload isis_server:app'"
-#    working_dir: /app
-#    volumes: [".:/app"]
-#    ports: ["8000:8000"]
+  isis_server:
+    build: .
+    image: isis-server
+    container_name: isis-server
+    command: "bash -lc '.python/bin/gunicorn -c gunicorn.conf.py --reload isis_server:app'"
+    working_dir: /app
+    volumes: [".:/app"]
+    ports: ["8000:8000"]
