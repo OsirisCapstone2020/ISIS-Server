@@ -2,10 +2,12 @@ from smtplib import SMTP
 from email.message import EmailMessage
 from mimetypes import guess_type
 from os import remove as remove_file
+from zlib import compress as compress_bytes, Z_BEST_COMPRESSION
 
 from flask import current_app, request, jsonify
 
 from ..logger import get_logger
+from ..config import Config
 
 CMD_NAME = "email"
 
@@ -30,11 +32,21 @@ logger = get_logger(CMD_NAME)
 SUBJECT = "Output from Pipeline"
 FROM = "ascbot@usgs.gov"
 
+CHUNK_SZ = 1024
+
 
 def post_email():
-    input_file = current_app.s3_client.download(request.json["from"])
+    s3_file = current_app.s3_client.download(request.json["from"])
+    input_file = "{}.gz".format(s3_file)
 
-    # Will return one of these but not both
+    with open(s3_file, 'rb') as input_f, open(input_file, 'wb') as output_f:
+        chunk = input_f.read(CHUNK_SZ)
+        while chunk:
+            compressed = compress_bytes(chunk)
+            output_f.write(compressed)
+            chunk = input_f.read(CHUNK_SZ)
+
+    # One of these will be set but not both
     error = None
     to = None
 
@@ -59,8 +71,15 @@ def post_email():
                 subtype=sub_type
             )
 
-        with SMTP("localhost") as s:
+        logger.info("Sending email...")
+
+        with SMTP(Config.app.smtp_server, Config.app.smtp_port) as s:
+            s.ehlo()
+            s.starttls()
+            s.login(Config.app.smtp_username, Config.app.smtp_password)
             s.send_message(email_message)
+
+        logger.info("Email sent successfully")
 
         # File is unchanged, we just emailed it. So pass it through to the
         # next node
