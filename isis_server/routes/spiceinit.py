@@ -1,7 +1,7 @@
 from flask_expects_json import expects_json
 from flask import request, jsonify, current_app
 
-from ..logger import getLogger
+from ..logger import get_logger
 
 from pysis import isis
 from pysis.exceptions import ProcessError
@@ -16,14 +16,15 @@ SPICE_INIT_SCHEMA = {
             "type": "object",
             "properties": {
                 "web": {"type": "boolean"}
-            }
+            },
+            "required": ["web"]
         },
     },
     "required": ["args", "from"],
     "additionalProperties": False
 }
 
-logger = getLogger(CMD_NAME)
+logger = get_logger(CMD_NAME)
 
 
 @expects_json(SPICE_INIT_SCHEMA)

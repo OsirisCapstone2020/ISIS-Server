@@ -1,6 +1,7 @@
 from flask import Flask
 
 from .routes import post_start, post_spiceinit, get_all_commands, get_command
+from .routes.email import post_email
 from .s3 import S3Client
 from os import path, listdir
 
@@ -8,8 +9,6 @@ from .xml_reader import XMLReader
 
 STATUS_SERVER_ERROR = 500
 STATUS_BAD_REQUEST = 400
-
-TEST_BUCKET = "test"
 XML_LOCATION = path.relpath(path.join(path.dirname(__file__), "..", "xml"))
 
 
@@ -31,9 +30,10 @@ app.isis_commands = get_command_xml()
 # ===========
 
 # Add xml routes
-app.add_url_rule('/commands/<command_name>', 'single_command', get_command, methods=["GET"])
-app.add_url_rule('/commands', 'commands', get_all_commands, methods=["GET"])
+app.add_url_rule('/commands/<command_name>', view_func=get_command, methods=["GET"])
+app.add_url_rule('/commands', view_func=get_all_commands, methods=["GET"])
 
 # Add n8n node routes
-app.add_url_rule('/start', 'start', post_start, methods=["POST"])
-app.add_url_rule('/spiceinit', 'spiceinit', post_spiceinit, methods=["POST"])
+app.add_url_rule('/start', view_func=post_start, methods=["POST"])
+app.add_url_rule('/email', view_func=post_email, methods=["POST"])
+app.add_url_rule('/spiceinit', view_func=post_spiceinit, methods=["POST"])
