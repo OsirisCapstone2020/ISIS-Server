@@ -1,6 +1,6 @@
 from flask import Flask
 
-from .routes import post_start, post_spiceinit, get_all_commands, get_command
+from .routes import post_start, post_spiceinit, get_all_commands, get_command, post_mro_ctx_2_isis
 from .routes.email import post_email
 from .s3 import S3Client
 from os import path, listdir
@@ -37,3 +37,4 @@ app.add_url_rule('/commands', view_func=get_all_commands, methods=["GET"])
 app.add_url_rule('/start', view_func=post_start, methods=["POST"])
 app.add_url_rule('/email', view_func=post_email, methods=["POST"])
 app.add_url_rule('/spiceinit', view_func=post_spiceinit, methods=["POST"])
+app.add_url_rule('/mroctx2isis', view_func=post_mro_ctx_2_isis, methods=["POST"])

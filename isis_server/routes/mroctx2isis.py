@@ -1,23 +1,21 @@
 from flask_expects_json import expects_json
 from flask import request, jsonify, current_app
+from uuid import uuid4
 
 from ..logger import get_logger
 
 from pysis import isis
 from pysis.exceptions import ProcessError
 
-CMD_NAME = "spiceinit"
+CMD_NAME = "mroctx2isis"
 
-SPICE_INIT_SCHEMA = {
+MRO_CTX_SCHEMA = {
     "type": "object",
     "properties": {
         "from": {"type": "string"},
         "args": {
             "type": "object",
-            "properties": {
-                "web": {"type": "boolean"}
-            },
-            "required": ["web"]
+            "properties": {},
         },
     },
     "required": ["args", "from"],
@@ -27,10 +25,10 @@ SPICE_INIT_SCHEMA = {
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(SPICE_INIT_SCHEMA)
-def post_spiceinit():
+@expects_json(MRO_CTX_SCHEMA)
+def post_mro_ctx_2_isis():
     """
-    Called when a client POSTs to /spiceinit
+    Called when a client POSTs to /mroctx2isis
     """
     logger.debug("Running {}...".format(CMD_NAME))
 
@@ -42,12 +40,11 @@ def post_spiceinit():
 
     try:
         input_file = current_app.s3_client.download(request.json["from"])
-        web = request.json["args"]["web"]
 
-        isis.spiceinit(from_=input_file, web=web)
+        temp_file_name = "/tmp/{}.cub".format(str(uuid4()))
+        isis.mroctx2isis(from_=input_file, to=temp_file_name)
 
-        # For spiceinit, input file is unchanged, so just pass it through
-        output_file = input_file
+        output_file = current_app.s3_client.upload(temp_file_name)
 
         logger.debug("{} completed".format(CMD_NAME))
 
