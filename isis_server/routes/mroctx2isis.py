@@ -3,7 +3,7 @@ from flask import request, jsonify, current_app
 from uuid import uuid4
 from os import remove as remove_file
 from os import path
-from tempfile import tempdir
+from tempfile import gettempdir
 
 from ..logger import get_logger
 
@@ -33,7 +33,6 @@ def post_mro_ctx_2_isis():
     """
     Called when a client POSTs to /mroctx2isis
     """
-    logger.debug("Running {}...".format(CMD_NAME))
 
     # Either output_file or err will be set, but not both
     # output_file is set on success
@@ -45,7 +44,10 @@ def post_mro_ctx_2_isis():
     try:
         input_file = current_app.s3_client.download(request.json["from"])
 
-        temp_file_name = path.join(tempdir, "{}.cub".format(str(uuid4())))
+        temp_file_name = path.join(gettempdir(), "{}.cub".format(str(uuid4())))
+
+        logger.debug("Running mroctx2isis...")
+
         isis.mroctx2isis(from_=input_file, to=temp_file_name)
 
         output_file = current_app.s3_client.upload(temp_file_name)
