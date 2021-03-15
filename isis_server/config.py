@@ -35,10 +35,10 @@ class _AppConfig:
         getenv(_ENV_APP_LOG_LEVEL, _DEFAULT_LOG_LEVEL).upper()
     )
 
-    smtp_server = getenv(_ENV_SMTP_SERVER)
+    smtp_server = getenv(_ENV_SMTP_SERVER, "localhost")
     smtp_port = getenv(_ENV_SMTP_PORT, _DEFAULT_SMTP_PORT)
-    smtp_username = getenv(_ENV_SMTP_USER)
-    smtp_password = getenv(_ENV_SMTP_PASSWORD)
+    smtp_username = getenv(_ENV_SMTP_USER, None)
+    smtp_password = getenv(_ENV_SMTP_PASSWORD, None)
 
 
 class _S3Config:

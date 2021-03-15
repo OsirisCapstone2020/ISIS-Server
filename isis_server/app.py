@@ -4,7 +4,8 @@ load_dotenv()
 
 from flask import Flask
 
-from .routes import post_start, post_spiceinit, get_all_commands, get_command, post_mro_ctx_2_isis
+from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
+    post_mro_ctx_2_isis, get_output_file
 from .routes.email import post_email
 from .s3 import S3Client
 from os import path, listdir
@@ -42,3 +43,6 @@ app.add_url_rule('/start', view_func=post_start, methods=["POST"])
 app.add_url_rule('/email', view_func=post_email, methods=["POST"])
 app.add_url_rule('/spiceinit', view_func=post_spiceinit, methods=["POST"])
 app.add_url_rule('/mroctx2isis', view_func=post_mro_ctx_2_isis, methods=["POST"])
+
+# Add the output route, which will serve output files
+app.add_url_rule('/output/<file_name>', view_func=get_output_file, methods=["GET"])

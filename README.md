@@ -7,10 +7,10 @@ Any environment variables without a default are required for the app to start
 | ---- | ----------- | ------- |
 | APP_LOG_LEVEL | A log level name (see [Python docs](https://docs.python.org/3/library/logging.html#logging-levels)) | "info" |
 | APP_PORT | The port that the app should run on | 8080 |
-| APP_SMTP_SERVER | The SMTP server for emailing pipeline output | |
-| APP_SMTP_PORT | The port for APP_SMTP_SERVER | 587 |
-| APP_SMTP_USERNAME | The username APP_SMTP_SERVER | |
-| APP_SMTP_PASSWORD | The password APP_SMTP_USERNAME | |
+| APP_SMTP_SERVER | The SMTP server for emailing pipeline output | localhost |
+| APP_SMTP_PORT | The port for APP_SMTP_SERVER | 25 |
+| APP_SMTP_USERNAME | The username APP_SMTP_SERVER | None |
+| APP_SMTP_PASSWORD | The password APP_SMTP_USERNAME | None |
 | S3_SERVER | The URL of the S3 server that the app should use to store intermediate data | |
 | S3_BUCKET | The name of the S3 bucket that the app should use | |
 | S3_ACCESS_KEY | The access key for S3_BUCKET | |
