@@ -4,6 +4,34 @@
     # make sure strings, ints, are used (how do you do this when python doesn't have types?????)
     
 import json
+from copy import deepcopy
+
+_DEFAULT_JSON_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "from": {"type": "string"},
+        "args": {
+            "type": "object",
+            "properties": dict(),
+            "required": list(),
+            "additionalProperties": False
+        },
+    },
+    "required": ["args", "from"],
+    "additionalProperties": False
+}
+
+
+def get_json_schema(**kwargs):
+    schema = deepcopy(_DEFAULT_JSON_SCHEMA)
+
+    for k, v in kwargs.items():
+        schema["properties"]["args"]["properties"][k] = {
+            "type": v
+        }
+        schema["properties"]["args"]["required"].append(k)
+
+    return schema
 
 
 def read_json(json_file):

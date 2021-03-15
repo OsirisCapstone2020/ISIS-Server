@@ -4,25 +4,12 @@ from os import remove as remove_file
 from requests import get as req_get
 from tempfile import NamedTemporaryFile
 
+from ..input_validation import get_json_schema
 from ..logger import get_logger
 
-CMD_NAME = "start"
 READ_CHUNK_SZ = 8192
 
-START_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "from": {"type": "string"},
-        "args": {
-            "type": "object",
-            "properties": {}
-        },
-    },
-    "required": ["args", "from"],
-    "additionalProperties": False
-}
-
-logger = get_logger(CMD_NAME)
+logger = get_logger("start")
 
 
 def download(url):
@@ -37,7 +24,7 @@ def download(url):
         return temp_file.name
 
 
-@expects_json(START_SCHEMA)
+@expects_json(get_json_schema())
 def post_start():
     input_file = request.json["from"]
 
