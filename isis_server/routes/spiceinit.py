@@ -1,33 +1,17 @@
 from flask_expects_json import expects_json
 from flask import request, jsonify, current_app
 
+from ..input_validation import get_json_schema
 from ..logger import get_logger
 
 from pysis import isis
 from pysis.exceptions import ProcessError
 
 CMD_NAME = "spiceinit"
-
-SPICE_INIT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "from": {"type": "string"},
-        "args": {
-            "type": "object",
-            "properties": {
-                "web": {"type": "boolean"}
-            },
-            "required": ["web"]
-        },
-    },
-    "required": ["args", "from"],
-    "additionalProperties": False
-}
-
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(SPICE_INIT_SCHEMA)
+@expects_json(get_json_schema(web="boolean"))
 def post_spiceinit():
     """
     Called when a client POSTs to /spiceinit

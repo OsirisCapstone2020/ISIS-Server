@@ -1,8 +1,5 @@
-import dotenv
 from os import getenv
 from logging import getLevelName
-
-dotenv.load_dotenv()
 
 
 def check_env_exists(env_var: str) -> str:

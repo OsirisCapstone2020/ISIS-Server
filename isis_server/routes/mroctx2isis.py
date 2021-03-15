@@ -5,30 +5,17 @@ from os import remove as remove_file
 from os import path
 from tempfile import gettempdir
 
+from ..input_validation import get_json_schema
 from ..logger import get_logger
 
 from pysis import isis
 from pysis.exceptions import ProcessError
 
 CMD_NAME = "mroctx2isis"
-
-MRO_CTX_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "from": {"type": "string"},
-        "args": {
-            "type": "object",
-            "properties": {},
-        },
-    },
-    "required": ["args", "from"],
-    "additionalProperties": False
-}
-
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(MRO_CTX_SCHEMA)
+@expects_json(get_json_schema())
 def post_mro_ctx_2_isis():
     """
     Called when a client POSTs to /mroctx2isis

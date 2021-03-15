@@ -1,3 +1,7 @@
+# Load the environment other code is called
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask
 
 from .routes import post_start, post_spiceinit, get_all_commands, get_command, post_mro_ctx_2_isis

@@ -1,3 +1,7 @@
+# Load the environment other code is called
+from dotenv import load_dotenv
+load_dotenv()
+
 from os import cpu_count
 from isis_server import Config
 

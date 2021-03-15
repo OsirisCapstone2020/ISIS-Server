@@ -2,31 +2,16 @@ from smtplib import SMTP
 from email.message import EmailMessage
 from mimetypes import guess_type
 from os import remove as remove_file
-from zlib import compress as compress_bytes, Z_BEST_COMPRESSION
+from zlib import compress as compress_bytes
 
 from flask import current_app, request, jsonify
+from flask_expects_json import expects_json
 
+from ..input_validation import get_json_schema
 from ..logger import get_logger
 from ..config import Config
 
 CMD_NAME = "email"
-
-EMAIL_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "from": {"type": "string"},
-        "args": {
-            "type": "object",
-            "properties": {
-                "recipient": {"type": "string"}
-            },
-            "required": ["recipient"]
-        },
-    },
-    "required": ["args", "from"],
-    "additionalProperties": False
-}
-
 logger = get_logger(CMD_NAME)
 
 SUBJECT = "Output from Pipeline"
@@ -35,6 +20,7 @@ FROM = "ascbot@usgs.gov"
 CHUNK_SZ = 1024
 
 
+@expects_json(get_json_schema(recipient="string"))
 def post_email():
     s3_file = current_app.s3_client.download(request.json["from"])
     input_file = "{}.gz".format(s3_file)
