@@ -25,13 +25,14 @@ def post_spiceinit():
     error = None
 
     try:
-        input_file = current_app.s3_client.download(request.json["from"])
+        req_file = request.json["from"]
+        input_file = current_app.s3_client.download(req_file)
         web = request.json["args"]["web"]
 
         isis.spiceinit(from_=input_file, web=web)
 
         # For spiceinit, input file is unchanged, so just pass it through
-        output_file = input_file
+        output_file = req_file
 
         logger.debug("{} completed".format(CMD_NAME))
 

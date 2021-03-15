@@ -26,7 +26,9 @@ def get_json_schema(**kwargs):
     schema = deepcopy(_DEFAULT_JSON_SCHEMA)
 
     for k, v in kwargs.items():
-        schema["properties"]["args"]["properties"][k] = v
+        schema["properties"]["args"]["properties"][k] = {
+            "type": v
+        }
         schema["properties"]["args"]["required"].append(k)
 
     return schema
