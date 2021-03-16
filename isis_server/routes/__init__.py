@@ -7,4 +7,3 @@ from .cam2map import post_cam_2_map
 from .isis2std import post_isis_2_std
 
 from .xml import get_all_commands, get_command
-from .output import get_output_file

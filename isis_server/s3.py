@@ -4,11 +4,15 @@ from logging import getLogger, StreamHandler, WARN
 from sys import stdout
 from os import path
 from .config import Config
+from datetime import datetime
 
 set_boto3_logger("", level=WARN)
 s3_logger = getLogger("s3")
 s3_logger.addHandler(StreamHandler(stream=stdout))
 s3_logger.setLevel(Config.app.log_level)
+
+# 30 days
+PUBLIC_EXPIRES_IN = 86400 * 30
 
 
 class S3Client:
@@ -66,3 +70,43 @@ class S3Client:
             raise e
 
         return object_name
+
+    def copy(self, src_obj: str, dst_obj: str, public=False) -> str:
+        dst_obj = "{}_{}".format(
+            datetime.now().strftime("%F_%H-%M-%S"),
+            dst_obj
+        )
+
+        s3_logger.info("Copying {} to {}...".format(src_obj, dst_obj))
+
+        try:
+            copy_args = {
+                "Bucket": Config.s3.bucket,
+                "CopySource": {
+                    "Bucket": Config.s3.bucket,
+                    "Key": src_obj
+                },
+                "Key": dst_obj
+            }
+
+            self.s3.copy_object(**copy_args)
+
+            if public:
+                return self.s3.generate_presigned_url(
+                    "get_object",
+                    Params={
+                        "Bucket": Config.s3.bucket,
+                        "Key": dst_obj
+                    },
+                    ExpiresIn=PUBLIC_EXPIRES_IN
+                )
+            else:
+                return "{}/{}/{}".format(
+                    Config.s3.server,
+                    Config.s3.bucket,
+                    dst_obj
+                )
+
+        except Exception as e:
+            s3_logger.error("Copy failed: {}".format(str(e)))
+            raise e
