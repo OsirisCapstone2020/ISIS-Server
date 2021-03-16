@@ -2,8 +2,11 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask
-
+from .routes.ctxcal import post_ctx_cal
+from .xml_reader import XMLReader
+from os import path, listdir
+from .s3 import S3Client
+from .routes.email import post_email
 from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
     post_mro_ctx_2_isis, post_ctx_cal, post_ctx_even_odd,\
     post_cam_2_map, post_isis_2_std, get_output_file
@@ -11,7 +14,6 @@ from .routes.email import post_email
 from .s3 import S3Client
 from os import path, listdir
 
-from .xml_reader import XMLReader
 
 STATUS_SERVER_ERROR = 500
 STATUS_BAD_REQUEST = 400
