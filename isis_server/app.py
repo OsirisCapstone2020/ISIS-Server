@@ -1,6 +1,4 @@
-# Load the environment other code is called
-from dotenv import load_dotenv
-load_dotenv()
+from flask import Flask
 
 from .xml_reader import XMLReader
 from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
