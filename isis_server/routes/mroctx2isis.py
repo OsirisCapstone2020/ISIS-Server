@@ -25,19 +25,20 @@ def post_mro_ctx_2_isis():
     # output_file is set on success
     # err is set on failure
     input_file = None
+    temp_file = None
     output_file = None
     error = None
 
     try:
         input_file = current_app.s3_client.download(request.json["from"])
 
-        temp_file_name = path.join(gettempdir(), "{}.cub".format(str(uuid4())))
+        temp_file = path.join(gettempdir(), "{}.cub".format(str(uuid4())))
 
         logger.debug("Running mroctx2isis...")
 
-        isis.mroctx2isis(from_=input_file, to=temp_file_name)
+        isis.mroctx2isis(from_=input_file, to=temp_file)
 
-        output_file = current_app.s3_client.upload(temp_file_name)
+        output_file = current_app.s3_client.upload(temp_file)
 
         logger.debug("{} completed".format(CMD_NAME))
 
@@ -49,8 +50,8 @@ def post_mro_ctx_2_isis():
     if input_file is not None and path.exists(input_file):
         remove_file(input_file)
 
-    if output_file is not None and path.exists(output_file):
-        remove_file(output_file)
+    if temp_file is not None and path.exists(temp_file):
+        remove_file(temp_file)
 
     return jsonify({
         "to": output_file,

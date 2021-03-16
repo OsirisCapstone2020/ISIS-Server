@@ -1,10 +1,9 @@
 from flask_expects_json import expects_json
 from flask import request, jsonify, current_app
-from uuid import uuid4
 from os import remove as remove_file
 from os import path
-from tempfile import gettempdir
 
+from ..config import Config
 from ..input_validation import get_json_schema
 from ..logger import get_logger
 
@@ -25,19 +24,23 @@ def post_ctx_even_odd():
     # output_file is set on success
     # err is set on failure
     input_file = None
+    temp_file = None
     output_file = None
     error = None
 
     try:
         input_file = current_app.s3_client.download(request.json["from"])
 
-        temp_file_name = path.join(gettempdir(), "{}.cub".format(str(uuid4())))
+        _, ext = path.splitext(input_file)
+        ext = ".lev1eo{}".format(ext)
+
+        temp_file = Config.get_tmp_file(ext)
 
         logger.debug("Running ctxevenodd...")
 
-        isis.ctxevenodd(from_=input_file, to=temp_file_name)
+        isis.ctxevenodd(from_=input_file, to=temp_file)
 
-        output_file = current_app.s3_client.upload(temp_file_name)
+        output_file = current_app.s3_client.upload(temp_file)
 
         logger.debug("{} completed".format(CMD_NAME))
 
@@ -49,8 +52,8 @@ def post_ctx_even_odd():
     if input_file is not None and path.exists(input_file):
         remove_file(input_file)
 
-    if output_file is not None and path.exists(output_file):
-        remove_file(output_file)
+    if temp_file is not None and path.exists(temp_file):
+        remove_file(temp_file)
 
     return jsonify({
         "to": output_file,

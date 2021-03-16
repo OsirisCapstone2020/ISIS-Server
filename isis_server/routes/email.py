@@ -39,7 +39,7 @@ def post_email():
         email_message['subject'] = SUBJECT
         email_message['to'] = recipient
         email_message['from'] = FROM
-        email_body = "Hi there, your pipeline output is ready at {}".format(
+        email_body = "Hi there, your pipeline output is ready at {}. This link will expire in 30 days.".format(
             output_file
         )
         email_message.set_content(MIMEText(email_body, "plain"))

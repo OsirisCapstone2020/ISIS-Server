@@ -1,5 +1,7 @@
 from flask_expects_json import expects_json
 from flask import request, jsonify, current_app
+from os.path import exists as path_exists
+from os import remove as remove_file
 
 from ..input_validation import get_json_schema
 from ..logger import get_logger
@@ -21,15 +23,16 @@ def post_spiceinit():
     # Either output_file or err will be set, but not both
     # output_file is set on success
     # err is set on failure
+    temp_file = None
     output_file = None
     error = None
 
     try:
         req_file = request.json["from"]
-        input_file = current_app.s3_client.download(req_file)
+        temp_file = current_app.s3_client.download(req_file)
         web = request.json["args"]["web"]
 
-        isis.spiceinit(from_=input_file, web=web)
+        isis.spiceinit(from_=temp_file, web=web)
 
         # For spiceinit, input file is unchanged, so just pass it through
         output_file = req_file
@@ -39,6 +42,9 @@ def post_spiceinit():
     except ProcessError as e:
         error = e.stderr.decode("utf-8")
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
+
+    if temp_file is not None and path_exists(temp_file):
+        remove_file(temp_file)
 
     return jsonify({
         "to": output_file,

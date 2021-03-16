@@ -1,5 +1,8 @@
 from os import getenv
 from logging import getLevelName
+from tempfile import gettempdir
+from uuid import uuid4
+from os.path import join as path_join
 
 
 def check_env_exists(env_var: str) -> str:
@@ -64,3 +67,12 @@ class Config:
     """
     app = _AppConfig
     s3 = _S3Config
+
+    @staticmethod
+    def get_tmp_file(ext=None):
+        file_name = str(uuid4())
+
+        if ext is not None:
+            file_name += ext.lower()
+
+        return path_join(gettempdir(), file_name)

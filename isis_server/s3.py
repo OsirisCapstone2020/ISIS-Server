@@ -1,8 +1,7 @@
 from boto3 import client as s3_client, set_stream_logger as set_boto3_logger
-from tempfile import NamedTemporaryFile
 from logging import getLogger, StreamHandler, WARN
 from sys import stdout
-from os import path
+from os import path, extsep
 from .config import Config
 from datetime import datetime
 
@@ -23,7 +22,6 @@ class S3Client:
             aws_access_key_id=Config.s3.access_key,
             aws_secret_access_key=Config.s3.secret_key
         )
-        # s3_logger.info(self.s3.list_objects(Bucket=Config.s3.bucket))
 
     def download(self, object_name: str) -> str:
         """
@@ -32,13 +30,16 @@ class S3Client:
         """
         try:
             s3_logger.info("Downloading {}...".format(object_name))
-            with NamedTemporaryFile(delete=False, mode='wb') as temp_file:
+
+            _, ext = object_name.split(sep=extsep, maxsplit=1)
+            temp_file_name = Config.get_tmp_file(".{}".format(ext))
+
+            with open(temp_file_name, mode='wb') as temp_file:
                 self.s3.download_fileobj(
                     Config.s3.bucket,
                     object_name,
                     temp_file
                 )
-                temp_file_name = temp_file.name
 
             s3_logger.info(
                 "Download complete. Stored at {}.\n".format(temp_file_name)
