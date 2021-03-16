@@ -1,16 +1,14 @@
 # Load the environment other code is called
+from .xml_reader import XMLReader
+from os import path, listdir
+from .s3 import S3Client
+from .routes.email import post_email
+from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
+    post_mro_ctx_2_isis, get_output_file
+from flask import Flask
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask
-
-from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
-    post_mro_ctx_2_isis, get_output_file
-from .routes.email import post_email
-from .s3 import S3Client
-from os import path, listdir
-
-from .xml_reader import XMLReader
 
 STATUS_SERVER_ERROR = 500
 STATUS_BAD_REQUEST = 400
@@ -43,6 +41,7 @@ app.add_url_rule('/start', view_func=post_start, methods=["POST"])
 app.add_url_rule('/email', view_func=post_email, methods=["POST"])
 app.add_url_rule('/spiceinit', view_func=post_spiceinit, methods=["POST"])
 app.add_url_rule('/mroctx2isis', view_func=post_mro_ctx_2_isis, methods=["POST"])
+app.add_url_rule('/ctxcal', view_func=post_ctx_cal, methods=["POST"])
 
 # Add the output route, which will serve output files
 app.add_url_rule('/output/<file_name>', view_func=get_output_file, methods=["GET"])
