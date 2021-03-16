@@ -11,6 +11,8 @@ dependencies:
   - pysis>=0.6.4
   - pip:
       - flask
+      - python-dotenv
       - boto3
       - gunicorn
       - flask-expects-json
+      - requests
