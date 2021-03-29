@@ -35,6 +35,20 @@ S3_SECRET_KEY=...
 
 
 ## Development
+
+### Install GDAL
+This project requires GDAL >= 3.1.0 be installed globally, since GDAL and ISIS cannot
+currently be installed [in the same conda environment](https://github.com/USGS-Astrogeology/ISIS3/issues/3570).
+
+On Ubuntu:
+```console
+# apt-get install -y python3-dev
+# add-apt-repository ppa:ubuntugis/ppa
+# apt-get update
+# apt-get install -y gdal-bin
+```
+
+### Create the project environment
 1. Install [miniconda3](https://docs.conda.io/en/latest/miniconda.html)
 2. Install the project's dependencies into [.python](./.python)
    ```console
