@@ -13,8 +13,16 @@ from pysis.exceptions import ProcessError
 CMD_NAME = "isis2std"
 logger = get_logger(CMD_NAME)
 
+ALLOWED_STD_TYPES = [
+    "png",
+    "bmp",
+    "tif",
+    "jpeg",
+    "jp2"
+]
 
-@expects_json(get_json_schema())
+
+@expects_json(get_json_schema(file_type="string"))
 def post_isis_2_std():
     """
     Called when a client POSTs to /isis2std
@@ -27,15 +35,21 @@ def post_isis_2_std():
     temp_file = None
     output_file = None
     error = None
+    file_type = request.json["args"]["file_type"].lower()
 
     try:
+        if file_type not in ALLOWED_STD_TYPES:
+            raise Exception(
+                "Allowed file types are {}".format(", ".join(ALLOWED_STD_TYPES))
+            )
+
         input_file = current_app.s3_client.download(request.json["from"])
 
-        temp_file = Config.get_tmp_file(".png")
+        temp_file = Config.get_tmp_file(".{}".format(file_type))
 
         logger.debug("Running isis2std...")
 
-        isis.isis2std(from_=input_file, to=temp_file)
+        isis.isis2std(from_=input_file, format=file_type, to=temp_file)
 
         output_file = current_app.s3_client.upload(temp_file)
 
@@ -43,6 +57,11 @@ def post_isis_2_std():
 
     except ProcessError as e:
         error = e.stderr.decode("utf-8")
+
+    except Exception as e:
+        error = str(e)
+
+    if error is not None:
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
 
     # Clean up
