@@ -17,8 +17,7 @@ def post_mro_ctx_2_isis():
     Called when a client POSTs to /cam2map
     """
 
-    # TODO: change hardcoded map file dynamically
-    isis_request = ISISRequest(request)
+    isis_request = ISISRequest(request, output_extension="cub")
 
     output_files = list()
     error = None
