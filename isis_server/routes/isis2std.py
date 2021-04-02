@@ -1,14 +1,11 @@
+from flask import request, jsonify
 from flask_expects_json import expects_json
-from flask import request, jsonify, current_app
-from os import remove as remove_file
-from os import path
+from pysis import IsisPool
+from pysis.exceptions import ProcessError
 
-from ..config import Config
+from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-
-from pysis import isis
-from pysis.exceptions import ProcessError
 
 CMD_NAME = "isis2std"
 logger = get_logger(CMD_NAME)
@@ -31,11 +28,10 @@ def post_isis_2_std():
     # Either output_file or err will be set, but not both
     # output_file is set on success
     # err is set on failure
-    input_file = None
-    temp_file = None
-    output_file = None
+    output_files = list()
     error = None
     file_type = request.json["args"]["file_type"].lower()
+    isis_request = ISISRequest(request, output_extension=file_type)
 
     try:
         if file_type not in ALLOWED_STD_TYPES:
@@ -43,35 +39,25 @@ def post_isis_2_std():
                 "Allowed file types are {}".format(", ".join(ALLOWED_STD_TYPES))
             )
 
-        input_file = current_app.s3_client.download(request.json["from"])
+        logger.debug("Running {}...".format(CMD_NAME))
+        with IsisPool() as isis:
+            for file in isis_request.input_files:
+                isis.isis2std(
+                    from_=file.input_target,
+                    to=file.output_target,
+                    format=file_type
+                )
 
-        temp_file = Config.get_tmp_file(".{}".format(file_type))
-
-        logger.debug("Running isis2std...")
-
-        isis.isis2std(from_=input_file, format=file_type, to=temp_file)
-
-        output_file = current_app.s3_client.upload(temp_file)
-
-        logger.debug("{} completed".format(CMD_NAME))
+        logger.debug("{} complete".format(CMD_NAME))
+        output_files = isis_request.upload_output()
 
     except ProcessError as e:
         error = e.stderr.decode("utf-8")
-
-    except Exception as e:
-        error = str(e)
-
-    if error is not None:
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
 
-    # Clean up
-    if input_file is not None and path.exists(input_file):
-        remove_file(input_file)
-
-    if temp_file is not None and path.exists(temp_file):
-        remove_file(temp_file)
+    isis_request.cleanup()
 
     return jsonify({
-        "to": output_file,
+        "to": output_files,
         "err": error
     })

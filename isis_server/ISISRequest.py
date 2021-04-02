@@ -10,7 +10,13 @@ from uuid import uuid4
 class ISISInputFile:
     def __init__(self, downloaded_file: str, output_extension=None):
         self.input_target = downloaded_file
-        self.output_extension = output_extension
+
+        if output_extension is None:
+            input_basename = basename(self.input_target)
+            _, ext = splitext(input_basename)
+            self.output_target = ISISInputFile.get_tmp_file(ext)
+        else:
+            self.output_target = ISISInputFile.get_tmp_file(output_extension)
 
     @staticmethod
     def remove_file_if_exists(file: str):
@@ -25,16 +31,6 @@ class ISISInputFile:
         )
         return path_join(gettempdir(), tmp_file)
 
-    @property
-    def output_target(self):
-        input_basename = basename(self.input_target)
-
-        if self.output_extension is None:
-            _, ext = splitext(input_basename)
-            return ISISInputFile.get_tmp_file(ext)
-        else:
-            return ISISInputFile.get_tmp_file(self.output_extension)
-
 
 class ISISRequest:
     def __init__(self, req: Request, output_extension=None):
@@ -46,11 +42,15 @@ class ISISRequest:
         if isinstance(req_input_files, str):
             req_input_files = [req_input_files]
 
-        for file in req_input_files:
-            input_file = current_app.s3_client.download(file)
-            self.input_files.append(
-                ISISInputFile(input_file, output_extension=output_extension)
-            )
+        temp_files = current_app.s3_client.multi_download(req_input_files)
+
+        for tf in temp_files:
+            isis_file = ISISInputFile(tf, output_extension=output_extension)
+            self.input_files.append(isis_file)
+
+    def upload_output(self):
+        output_files = [isis_file.output_target for isis_file in self.input_files]
+        return current_app.s3_client.multi_upload(output_files)
 
     def cleanup(self):
         for file in self.input_files:

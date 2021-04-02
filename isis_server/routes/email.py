@@ -1,13 +1,13 @@
-from smtplib import SMTP
 from email.message import EmailMessage
 from email.mime.text import MIMEText
+from smtplib import SMTP
 
 from flask import request, jsonify, current_app
 from flask_expects_json import expects_json
 
+from ..config import Config
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-from ..config import Config
 
 CMD_NAME = "email"
 logger = get_logger(CMD_NAME)

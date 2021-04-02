@@ -1,12 +1,12 @@
-from flask_expects_json import expects_json
-from flask import request, jsonify, current_app
-from os import remove as remove_file
-from os import path
 from subprocess import check_output, CalledProcessError
 
-from ..config import Config
+from flask import request, jsonify
+from flask_expects_json import expects_json
+
+from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
+from concurrent.futures import ProcessPoolExecutor
 
 CMD_NAME = "cog"
 logger = get_logger(CMD_NAME)
@@ -38,44 +38,30 @@ def post_cog():
     Called when a client POSTs to /cog
     """
 
-    # Either output_file or err will be set, but not both
-    # output_file is set on success
-    # err is set on failure
-    input_files = request.json["from"]
-    cleanup_files = list()
-    output_file = None
+    isis_request = ISISRequest(request)
+    output_files = list()
     error = None
 
     try:
-        input_file = current_app.s3_client.download()
-
-        temp_file = Config.get_tmp_file(".tif")
-
         logger.debug("Running {}...".format(CMD_NAME))
+        with ProcessPoolExecutor() as process_pool:
+            for isis_file in isis_request.input_files:
+                process_pool.submit(
+                    cog_covert,
+                    isis_file.input_target,
+                    isis_file.output_target
+                )
 
-        cog_covert(input_file, temp_file)
-
-        output_file = current_app.s3_client.upload(temp_file)
-
-        logger.debug("{} completed".format(CMD_NAME))
+        logger.debug("{} complete".format(CMD_NAME))
+        output_files = isis_request.upload_output()
 
     except CalledProcessError as e:
         error = e.stderr.decode("utf-8")
-
-    except Exception as e:
-        error = str(e)
-
-    if error is not None:
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
 
-    # Clean up
-    if input_file is not None and path.exists(input_file):
-        remove_file(input_file)
-
-    if temp_file is not None and path.exists(temp_file):
-        remove_file(temp_file)
+    isis_request.cleanup()
 
     return jsonify({
-        "to": output_file,
+        "to": output_files,
         "err": error
     })

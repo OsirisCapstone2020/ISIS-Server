@@ -1,12 +1,11 @@
-from flask_expects_json import expects_json
 from flask import request, jsonify
+from flask_expects_json import expects_json
+from pysis import IsisPool
+from pysis.exceptions import ProcessError
 
 from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-
-from pysis import isis
-from pysis.exceptions import ProcessError
 
 CMD_NAME = "cam2map"
 logger = get_logger(CMD_NAME)
@@ -22,19 +21,25 @@ def post_cam_2_map():
     # output_file is set on success
     # err is set on failure
     # TODO: change hardcoded map file dynamically
+    MAP_FILE = "/data/disk/isisdata/npolar90.map"
+
     isis_request = ISISRequest(request)
 
     output_files = list()
     error = None
 
     try:
-        for file in isis_request.input_files:
-            isis.cam2map(
-                from_=file.input_target,
-                to=file.output_target,
-                map="/data/disk/isisdata/npolar90.map"
-            )
-            output_files.append(file.output_target)
+        logger.debug("Running {}...".format(CMD_NAME))
+        with IsisPool() as isis:
+            for file in isis_request.input_files:
+                isis.cam2map(
+                    from_=file.input_target,
+                    to=file.output_target,
+                    map=MAP_FILE
+                )
+
+        logger.debug("{} complete".format(CMD_NAME))
+        output_files = isis_request.upload_output()
 
     except ProcessError as e:
         error = e.stderr.decode("utf-8")

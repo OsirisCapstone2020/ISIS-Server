@@ -47,7 +47,7 @@ class S3Client:
                 )
 
             s3_logger.info(
-                "Download complete. Stored at {}.\n".format(temp_file_name)
+                "Download complete. Stored at {}.".format(temp_file_name)
             )
         except Exception as e:
             s3_logger.error("Download failed: {}".format(str(e)))

@@ -1,13 +1,14 @@
-from flask_expects_json import expects_json
-from flask import request, jsonify, current_app
+from concurrent.futures import ThreadPoolExecutor
 from os.path import splitext, basename
-from requests import get as req_get
 from urllib.parse import urlparse
+
+from flask import request, jsonify, current_app
+from flask_expects_json import expects_json
+from requests import get as req_get
 
 from ..ISISRequest import ISISInputFile
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-from concurrent.futures import ThreadPoolExecutor
 
 READ_CHUNK_SZ = 8192
 
