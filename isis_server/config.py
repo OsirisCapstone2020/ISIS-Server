@@ -1,9 +1,9 @@
 from os import getenv
 from logging import getLevelName
 from tempfile import gettempdir
-from uuid import uuid4
 from datetime import datetime
-from os.path import join as path_join
+from os.path import join as path_join, exists as path_exists
+from os import remove as remove_file
 
 
 def check_env_exists(env_var: str) -> str:
@@ -69,10 +69,3 @@ class Config:
     app = _AppConfig
     s3 = _S3Config
 
-    @staticmethod
-    def get_tmp_file(orig_file: str):
-        file_name = "{}_{}".format(
-            datetime.now().strftime("%F_%H-%M-%S"),
-            orig_file
-        )
-        return path_join(gettempdir(), file_name)

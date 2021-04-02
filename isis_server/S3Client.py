@@ -1,7 +1,11 @@
+from os.path import splitext
+
 from boto3 import client as s3_client, set_stream_logger as set_boto3_logger
 from logging import getLogger, StreamHandler, WARN
 from sys import stdout
 from os import path, extsep
+
+from .ISISRequest import ISISInputFile
 from .config import Config
 from datetime import datetime
 
@@ -30,9 +34,8 @@ class S3Client:
         """
         try:
             s3_logger.info("Downloading {}...".format(object_name))
-
-            _, ext = object_name.split(sep=extsep, maxsplit=1)
-            temp_file_name = Config.get_tmp_file(".{}".format(ext))
+            _, ext = splitext(object_name)
+            temp_file_name = ISISInputFile.get_tmp_file(ext)
 
             with open(temp_file_name, mode='wb') as temp_file:
                 self.s3.download_fileobj(

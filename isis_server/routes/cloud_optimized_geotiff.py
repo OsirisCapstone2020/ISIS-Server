@@ -41,13 +41,13 @@ def post_cog():
     # Either output_file or err will be set, but not both
     # output_file is set on success
     # err is set on failure
-    input_file = None
-    temp_file = None
+    input_files = request.json["from"]
+    cleanup_files = list()
     output_file = None
     error = None
 
     try:
-        input_file = current_app.s3_client.download(request.json["from"])
+        input_file = current_app.s3_client.download()
 
         temp_file = Config.get_tmp_file(".tif")
 
