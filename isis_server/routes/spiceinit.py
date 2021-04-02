@@ -34,8 +34,7 @@ def post_spiceinit():
 
         isis.spiceinit(from_=temp_file, web=web)
 
-        # For spiceinit, input file is unchanged, so just pass it through
-        output_file = req_file
+        output_file = current_app.s3_client.upload(temp_file)
 
         logger.debug("{} completed".format(CMD_NAME))
 
