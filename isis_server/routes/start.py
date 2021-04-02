@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from ..ISISRequest import ISISInputFile
 from ..input_validation import get_json_schema
 from ..logger import get_logger
+from concurrent.futures import ThreadPoolExecutor
 
 READ_CHUNK_SZ = 8192
 
@@ -22,10 +23,14 @@ def download(url):
     _, ext = splitext(orig_file)
     output_file = ISISInputFile.get_tmp_file(ext)
 
+    logger.debug("Downloading {}...".format(url))
+
     with req_get(url, stream=True) as req, open(output_file, mode='wb') as temp_file:
         req.raise_for_status()
         for req_chunk in req.iter_content(READ_CHUNK_SZ):
             temp_file.write(req_chunk)
+
+    logger.debug("{} downloaded to {}".format(url, output_file))
 
     return output_file
 
@@ -36,29 +41,26 @@ def post_start():
 
     # Either err or output_file will be set, but not both
     err = None
-    output_files = list()
-    cleanup_files = list()
+    dl_threads = list()
+    s3_objects = list()
+    downloaded_files = list()
 
     try:
-        # Download the file to a temp file, upload it to S3, delete the
-        # temp file
-        for file in input_files:
-            logger.debug("Downloading {}...".format(file))
-            temp_file = download(file)
-            logger.debug("{} downloaded to {}".format(file, temp_file))
+        with ThreadPoolExecutor() as download_thread_pool:
+            for file in input_files:
+                dl_thread = download_thread_pool.submit(download, file)
+                dl_threads.append(dl_thread)
 
-            output_file = current_app.s3_client.upload(temp_file)
-
-            cleanup_files.append(temp_file)
-            output_files.append(output_file)
+        downloaded_files = [t.result() for t in dl_threads]
+        s3_objects = current_app.s3_client.multi_upload(downloaded_files)
 
     except Exception as e:
         err = str(e)
 
-    for temp_file in cleanup_files:
+    for temp_file in downloaded_files:
         ISISInputFile.remove_file_if_exists(temp_file)
 
     return jsonify({
-        "to": output_files,
+        "to": s3_objects,
         "err": err
     })

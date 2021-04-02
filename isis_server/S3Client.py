@@ -1,4 +1,5 @@
 from os.path import splitext
+from typing import List
 
 from boto3 import client as s3_client, set_stream_logger as set_boto3_logger
 from logging import getLogger, StreamHandler, WARN
@@ -8,6 +9,7 @@ from os import path, extsep
 from .ISISRequest import ISISInputFile
 from .config import Config
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 set_boto3_logger("", level=WARN)
 s3_logger = getLogger("s3")
@@ -53,6 +55,13 @@ class S3Client:
 
         return temp_file_name
 
+    def multi_download(self, object_names: List[str]) -> List[str]:
+        threads = list()
+        with ThreadPoolExecutor() as thread_pool:
+            for object_name in object_names:
+                threads.append(thread_pool.submit(self.download, object_name))
+        return [t.result() for t in threads]
+
     def upload(self, file_path: str) -> str:
         """
         Uploads the file at file_path to s3
@@ -68,12 +77,19 @@ class S3Client:
                 Config.s3.bucket,
                 object_name
             )
-            s3_logger.info("Upload of {} complete.\n".format(file_path))
+            s3_logger.info("Upload of {} complete.".format(file_path))
         except Exception as e:
             s3_logger.error("Upload failed: {}".format(str(e)))
             raise e
 
         return object_name
+
+    def multi_upload(self, file_paths: List[str]) -> List[str]:
+        threads = list()
+        with ThreadPoolExecutor() as thread_pool:
+            for file_path in file_paths:
+                threads.append(thread_pool.submit(self.upload, file_path))
+        return [t.result() for t in threads]
 
     def copy(self, src_obj: str, dst_obj: str, public=False) -> str:
         dst_obj = "{}_{}".format(
