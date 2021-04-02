@@ -1,35 +1,23 @@
 from typing import List
 
 from flask import Request, current_app
-from os.path import splitext, basename, exists as path_exists, join as path_join
-from tempfile import gettempdir
-from os import remove as remove_file
-from uuid import uuid4
+from os.path import splitext, basename
+
+from .S3Client import S3File
+from .utils import Utils
 
 
 class ISISInputFile:
-    def __init__(self, downloaded_file: str, output_extension=None):
-        self.input_target = downloaded_file
+    def __init__(self, downloaded_file: S3File, output_extension=None):
+        self.input_target = downloaded_file.path
+        self.tags = downloaded_file.tags
 
         if output_extension is None:
             input_basename = basename(self.input_target)
             _, ext = splitext(input_basename)
-            self.output_target = ISISInputFile.get_tmp_file(ext)
+            self.output_target = Utils.get_tmp_file(ext)
         else:
-            self.output_target = ISISInputFile.get_tmp_file(output_extension)
-
-    @staticmethod
-    def remove_file_if_exists(file: str):
-        if path_exists(file):
-            remove_file(file)
-
-    @staticmethod
-    def get_tmp_file(extension: str):
-        tmp_file = "{}.{}".format(
-            uuid4(),
-            extension.lower().strip(".")
-        )
-        return path_join(gettempdir(), tmp_file)
+            self.output_target = Utils.get_tmp_file(output_extension)
 
 
 class ISISRequest:
@@ -49,10 +37,13 @@ class ISISRequest:
             self.input_files.append(isis_file)
 
     def upload_output(self):
-        output_files = [isis_file.output_target for isis_file in self.input_files]
+        output_files = list()
+        for input_file in self.input_files:
+            output_file = S3File(input_file.output_target, input_file.tags)
+            output_files.append(output_file)
         return current_app.s3_client.multi_upload(output_files)
 
     def cleanup(self):
         for file in self.input_files:
-            ISISInputFile.remove_file_if_exists(file.input_target)
-            ISISInputFile.remove_file_if_exists(file.output_target)
+            Utils.remove_file_if_exists(file.input_target)
+            Utils.remove_file_if_exists(file.output_target)
