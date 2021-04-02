@@ -2,6 +2,7 @@ from os import getenv
 from logging import getLevelName
 from tempfile import gettempdir
 from uuid import uuid4
+from datetime import datetime
 from os.path import join as path_join
 
 
@@ -69,10 +70,9 @@ class Config:
     s3 = _S3Config
 
     @staticmethod
-    def get_tmp_file(ext=None):
-        file_name = str(uuid4())
-
-        if ext is not None:
-            file_name += ext.lower()
-
+    def get_tmp_file(orig_file: str):
+        file_name = "{}_{}".format(
+            datetime.now().strftime("%F_%H-%M-%S"),
+            orig_file
+        )
         return path_join(gettempdir(), file_name)

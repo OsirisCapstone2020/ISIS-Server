@@ -9,7 +9,12 @@ from copy import deepcopy
 _DEFAULT_JSON_SCHEMA = {
     "type": "object",
     "properties": {
-        "from": {"type": "string"},
+        "from": {
+            "anyof": [
+                {"type": "string"},
+                {"type": "array", "items": {"type": "string"}},
+            ]
+        },
         "args": {
             "type": "object",
             "properties": dict(),
@@ -25,10 +30,14 @@ _DEFAULT_JSON_SCHEMA = {
 def get_json_schema(**kwargs):
     schema = deepcopy(_DEFAULT_JSON_SCHEMA)
 
-    for k, v in kwargs.items():
-        schema["properties"]["args"]["properties"][k] = {
-            "type": v
-        }
+    for k, k_type in kwargs.items():
+        if isinstance(k_type, str):
+            schema["properties"]["args"]["properties"][k] = {
+                "type": k_type
+            }
+        else:
+            schema["properties"]["args"]["properties"][k] = k_type
+
         schema["properties"]["args"]["required"].append(k)
 
     return schema

@@ -39,7 +39,11 @@ def post_cam_2_map():
 
         logger.debug("Running cam2map...")
 
-        isis.cam2map(from_=input_file, map="/isisdata/npolar90.map", to=temp_file)
+        isis.cam2map(
+            from_=input_file,
+            map="/data/disk/isisdata/npolar90.map",
+            to=temp_file
+        )
 
         output_file = current_app.s3_client.upload(temp_file)
 
