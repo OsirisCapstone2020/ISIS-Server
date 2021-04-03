@@ -33,12 +33,12 @@ def cog_covert(input_file: str, output_file: str, compression="LZW"):
             "Please convert the file first."
         )
 
-    # TODO: Make PROJ_LIB more configurable
     gdal_args = ["-of", "COG", "-co", "COMPRESS={}".format(compression)]
 
     if input_ext == ".cub":
         gdal_args = [*gdal_args, "-ot", "byte", "-scale"]
 
+    # TODO: Make PROJ_LIB more configurable
     check_output([
         "gdal_translate",
         input_file,

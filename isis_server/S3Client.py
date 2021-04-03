@@ -17,9 +17,6 @@ s3_logger = getLogger("s3")
 s3_logger.addHandler(StreamHandler(stream=stdout))
 s3_logger.setLevel(Config.app.log_level)
 
-# 30 days
-PUBLIC_EXPIRES_IN = 86400 * 30
-
 
 class S3File:
     def __init__(self, temp_path: str, tags: dict):
@@ -121,23 +118,16 @@ class S3Client:
                 "Key": dst_obj
             }
 
+            if public:
+                copy_args["ACL"] = "public-read"
+
             self.s3.copy_object(**copy_args)
 
-            if public:
-                return self.s3.generate_presigned_url(
-                    "get_object",
-                    Params={
-                        "Bucket": Config.s3.bucket,
-                        "Key": dst_obj
-                    },
-                    ExpiresIn=PUBLIC_EXPIRES_IN
-                )
-            else:
-                return "{}/{}/{}".format(
-                    Config.s3.server,
-                    Config.s3.bucket,
-                    dst_obj
-                )
+            return "{}/{}/{}".format(
+                Config.s3.server,
+                Config.s3.bucket,
+                dst_obj
+            )
 
         except Exception as e:
             s3_logger.error("Copy failed: {}".format(str(e)))
