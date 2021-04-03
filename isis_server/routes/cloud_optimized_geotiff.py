@@ -1,3 +1,4 @@
+from os.path import splitext
 from subprocess import check_output, CalledProcessError
 
 from flask import request, jsonify
@@ -11,24 +12,38 @@ from concurrent.futures import ProcessPoolExecutor
 CMD_NAME = "cog"
 logger = get_logger(CMD_NAME)
 
+ALLOWED_EXTENSIONS = [
+    ".cub",
+    ".tif"
+]
+
 
 def cog_covert(input_file: str, output_file: str, compression="LZW"):
     """
     https://www.cogeo.org/developers-guide.html
     """
 
-    if not input_file.lower().endswith("tif"):
-        raise Exception("This command takes a .tif file as input")
+    _, input_ext = splitext(input_file)
+    if input_ext not in ALLOWED_EXTENSIONS:
+        raise Exception(
+            "Allowed extensions are {} (got '{}'). ".format(
+                ", ".join(ALLOWED_EXTENSIONS),
+                input_ext
+            ) +
+            "Please convert the file first."
+        )
 
     # TODO: Make PROJ_LIB more configurable
+    gdal_args = ["-of", "COG", "-co", "COMPRESS={}".format(compression)]
+
+    if input_ext == ".cub":
+        gdal_args = [*gdal_args, "-ot", "byte", "-scale"]
+
     check_output([
         "gdal_translate",
         input_file,
         output_file,
-        "-of",
-        "COG",
-        "-co",
-        "COMPRESS={}".format(compression)
+        *gdal_args
     ], env={"PROJ_LIB": "/usr/share/proj"})
 
 
@@ -38,7 +53,7 @@ def post_cog():
     Called when a client POSTs to /cog
     """
 
-    isis_request = ISISRequest(request)
+    isis_request = ISISRequest(request, output_extension="tif")
     output_files = list()
     error = None
 

@@ -11,14 +11,13 @@ CMD_NAME = "spiceinit"
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(get_json_schema(web="boolean"))
+@expects_json(get_json_schema())
 def post_spiceinit():
     """
     Called when a client POSTs to /spiceinit
     """
     error = None
     output_files = list()
-    web = request.json["args"]["web"]
 
     isis_request = ISISRequest(request)
 
@@ -32,9 +31,11 @@ def post_spiceinit():
                 logger.debug("Running {}...".format(CMD_NAME))
                 isis.spiceinit(
                     from_=file.input_target,
-                    web=web
+                    web=True
                 )
-                logger.debug("{} complete: {}".format(CMD_NAME, file.output_target))
+                logger.debug(
+                    "{} complete: {}".format(CMD_NAME, file.output_target)
+                )
 
         output_files = isis_request.upload_output()
 
