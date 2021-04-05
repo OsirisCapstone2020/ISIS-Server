@@ -1,51 +1,51 @@
+from flask import request, jsonify
 from flask_expects_json import expects_json
-from flask import request, jsonify, current_app
-from os.path import exists as path_exists
-from os import remove as remove_file
+from pysis import IsisPool
+from pysis.exceptions import ProcessError
 
+from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-
-from pysis import isis
-from pysis.exceptions import ProcessError
 
 CMD_NAME = "spiceinit"
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(get_json_schema(web="boolean"))
+@expects_json(get_json_schema())
 def post_spiceinit():
     """
     Called when a client POSTs to /spiceinit
     """
-    logger.debug("Running {}...".format(CMD_NAME))
-
-    # Either output_file or err will be set, but not both
-    # output_file is set on success
-    # err is set on failure
-    temp_file = None
-    output_file = None
     error = None
+    output_files = list()
+
+    isis_request = ISISRequest(request)
+
+    # For spiceinit, output files are the same as input files
+    for isis_file in isis_request.input_files:
+        isis_file.output_target = isis_file.input_target
 
     try:
-        req_file = request.json["from"]
-        temp_file = current_app.s3_client.download(req_file)
-        web = request.json["args"]["web"]
+        with IsisPool() as isis:
+            for file in isis_request.input_files:
+                logger.debug("Running {}...".format(CMD_NAME))
+                isis.spiceinit(
+                    from_=file.input_target,
+                    web=True
+                )
+                logger.debug(
+                    "{} complete: {}".format(CMD_NAME, file.output_target)
+                )
 
-        isis.spiceinit(from_=temp_file, web=web)
-
-        output_file = current_app.s3_client.upload(temp_file)
-
-        logger.debug("{} completed".format(CMD_NAME))
+        output_files = isis_request.upload_output()
 
     except ProcessError as e:
         error = e.stderr.decode("utf-8")
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
 
-    if temp_file is not None and path_exists(temp_file):
-        remove_file(temp_file)
+    isis_request.cleanup()
 
     return jsonify({
-        "to": output_file,
+        "to": output_files,
         "err": error
     })

@@ -1,62 +1,64 @@
+from flask import request, jsonify
 from flask_expects_json import expects_json
-from flask import request, jsonify, current_app
-from os import remove as remove_file
-from os import path
+from pysis import IsisPool, isis as Isis
+from pysis.exceptions import ProcessError
 
-from ..config import Config
+from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-
-from pysis import isis
-from pysis.exceptions import ProcessError
+from ..utils import Utils
 
 CMD_NAME = "cam2map"
 logger = get_logger(CMD_NAME)
 
 
-@expects_json(get_json_schema())
+@expects_json(
+    get_json_schema(projection="string", extra_args="object")
+)
 def post_cam_2_map():
     """
     Called when a client POSTs to /cam2map
     """
 
-    # Either output_file or err will be set, but not both
-    # output_file is set on success
-    # err is set on failure
-    # TODO: change hardcoded map file dynamically
-    input_file = None
-    temp_file = None
-    output_file = None
+    isis_request = ISISRequest(request)
+    map_file = Utils.get_tmp_file("map")
+
+    map_projection = request.json["args"]["projection"]
+    proj_extras = dict()
+
+    for kv_pair in request.json["args"]["extra_args"]["args"]:
+        proj_extras[kv_pair["arg_key"]] = kv_pair["arg_val"]
+
+    output_files = list()
     error = None
 
     try:
-        input_file = current_app.s3_client.download(request.json["from"])
+        logger.debug("Running {}...".format(CMD_NAME))
+        Isis.maptemplate(
+            map=map_file,
+            projection=map_projection,
+            **proj_extras
+        )
 
-        _, ext = path.splitext(input_file)
-        ext = ".lev2{}".format(ext)
+        with IsisPool() as isis:
+            for file in isis_request.input_files:
+                isis.cam2map(
+                    from_=file.input_target,
+                    to=file.output_target,
+                    map=map_file
+                )
 
-        temp_file = Config.get_tmp_file(ext)
-
-        logger.debug("Running cam2map...")
-
-        isis.cam2map(from_=input_file, map="/isisdata/npolar90.map", to=temp_file)
-
-        output_file = current_app.s3_client.upload(temp_file)
-
-        logger.debug("{} completed".format(CMD_NAME))
+        logger.debug("{} complete".format(CMD_NAME))
+        output_files = isis_request.upload_output()
 
     except ProcessError as e:
         error = e.stderr.decode("utf-8")
         logger.error("{} threw an error: {}".format(CMD_NAME, error))
 
-    # Clean up
-    if input_file is not None and path.exists(input_file):
-        remove_file(input_file)
-
-    if temp_file is not None and path.exists(temp_file):
-        remove_file(temp_file)
+    isis_request.cleanup()
+    Utils.remove_file_if_exists(map_file)
 
     return jsonify({
-        "to": output_file,
+        "to": output_files,
         "err": error
     })
