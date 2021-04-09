@@ -28,10 +28,10 @@ logconfig_dict = {
 bind = "0.0.0.0:{}".format(Config.app.port)
 
 # Allows for multi-core request processing
-#workers = cpu_count() * 2 + 1
+workers = cpu_count() * 2 + 1
 
 # Use a single worker for testing
-workers = 1
+# workers = 1
 
 # Allow for faster server restarts
 reuse_port = True
