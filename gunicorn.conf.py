@@ -28,7 +28,7 @@ logconfig_dict = {
 bind = "0.0.0.0:{}".format(Config.app.port)
 
 # Allows for multi-core request processing
-workers = cpu_count() * 2 + 1
+workers = min(cpu_count() * 2 + 1, 8)
 
 # Use a single worker for testing
 # workers = 1
