@@ -2,6 +2,7 @@ from os.path import splitext
 from typing import List
 
 from boto3 import client as s3_client, set_stream_logger as set_boto3_logger
+from botocore.config import Config as S3Config
 from logging import getLogger, StreamHandler, WARN
 from sys import stdout
 from os import path
@@ -9,6 +10,7 @@ from os import path
 from .config import Config
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlencode
 
 from .utils import Utils
 
@@ -30,7 +32,8 @@ class S3Client:
             "s3",
             endpoint_url=Config.s3.server,
             aws_access_key_id=Config.s3.access_key,
-            aws_secret_access_key=Config.s3.secret_key
+            aws_secret_access_key=Config.s3.secret_key,
+            config=S3Config(connect_timeout=300, read_timeout=300)
         )
 
     def download(self, object_name: str) -> S3File:
@@ -119,17 +122,14 @@ class S3Client:
             }
 
             if public:
-                copy_args["ExtraArgs"] = {
-                    "Metadata": {
-                        "public": "true"
-                    }
-                }
+                copy_args["TaggingDirective"] = "REPLACE"
+                copy_args["Tagging"] = urlencode(dict(public="true"))
 
             self.s3.copy_object(**copy_args)
+            s3_logger.info("Copy complete")
 
-            return "{}/{}/{}".format(
+            return "{}/{}".format(
                 Config.s3.server,
-                Config.s3.bucket,
                 dst_obj
             )
 

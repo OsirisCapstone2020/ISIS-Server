@@ -23,14 +23,14 @@ def post_mro_ctx_2_isis():
     error = None
 
     try:
+        logger.debug("Running {}...".format(CMD_NAME))
         with IsisPool() as isis:
             for file in isis_request.input_files:
-                logger.debug("Running {}...".format(CMD_NAME))
                 isis.mroctx2isis(
                     from_=file.input_target,
                     to=file.output_target
                 )
-                logger.debug("{} complete: {}".format(CMD_NAME, file.output_target))
+        logger.debug("{} complete".format(CMD_NAME))
 
         output_files = isis_request.upload_output()
 

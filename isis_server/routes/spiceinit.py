@@ -26,16 +26,14 @@ def post_spiceinit():
         isis_file.output_target = isis_file.input_target
 
     try:
+        logger.debug("Running {}...".format(CMD_NAME))
         with IsisPool() as isis:
             for file in isis_request.input_files:
-                logger.debug("Running {}...".format(CMD_NAME))
                 isis.spiceinit(
                     from_=file.input_target,
                     web=True
                 )
-                logger.debug(
-                    "{} complete: {}".format(CMD_NAME, file.output_target)
-                )
+        logger.debug("{} complete".format(CMD_NAME))
 
         output_files = isis_request.upload_output()
 

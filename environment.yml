@@ -12,7 +12,7 @@ dependencies:
   - pip:
       - flask
       - python-dotenv
-      - boto3
+      - boto3>=1.17.48
       - gunicorn
       - flask-expects-json
       - requests
