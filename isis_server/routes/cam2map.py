@@ -1,12 +1,13 @@
 from flask import request, jsonify
 from flask_expects_json import expects_json
-from pysis import IsisPool, isis as Isis
+from pysis import isis as Isis
 from pysis.exceptions import ProcessError
 
 from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
 from ..utils import Utils
+from ..ISISCommand import ISISCommand
 
 CMD_NAME = "cam2map"
 logger = get_logger(CMD_NAME)
@@ -21,6 +22,7 @@ def post_cam_2_map():
     """
 
     isis_request = ISISRequest(request)
+
     map_file = Utils.get_tmp_file("map")
 
     map_projection = request.json["args"]["projection"]
@@ -33,22 +35,15 @@ def post_cam_2_map():
     error = None
 
     try:
-        logger.debug("Running {}...".format(CMD_NAME))
         Isis.maptemplate(
             map=map_file,
             projection=map_projection,
             **proj_extras
         )
 
-        with IsisPool() as isis:
-            for file in isis_request.input_files:
-                isis.cam2map(
-                    from_=file.input_target,
-                    to=file.output_target,
-                    map=map_file
-                )
+        cam2map = ISISCommand(CMD_NAME, map=map_file)
+        cam2map.run(*isis_request.input_files)
 
-        logger.debug("{} complete".format(CMD_NAME))
         output_files = isis_request.upload_output()
 
     except ProcessError as e:

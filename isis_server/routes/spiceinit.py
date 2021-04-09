@@ -3,6 +3,7 @@ from flask_expects_json import expects_json
 from pysis import IsisPool
 from pysis.exceptions import ProcessError
 
+from ..ISISCommand import ISISCommand
 from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
@@ -26,16 +27,13 @@ def post_spiceinit():
         isis_file.output_target = isis_file.input_target
 
     try:
+        # Spiceinit is special, we can't use the ISISCommand class since
+        # there's no 'to' arg
+        logger.debug("Running {}...".format(CMD_NAME))
         with IsisPool() as isis:
             for file in isis_request.input_files:
-                logger.debug("Running {}...".format(CMD_NAME))
-                isis.spiceinit(
-                    from_=file.input_target,
-                    web=True
-                )
-                logger.debug(
-                    "{} complete: {}".format(CMD_NAME, file.output_target)
-                )
+                isis.spiceinit(from_=file.input_target, web=True)
+        logger.debug("{} complete".format(CMD_NAME))
 
         output_files = isis_request.upload_output()
 

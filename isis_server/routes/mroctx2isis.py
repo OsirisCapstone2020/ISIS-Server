@@ -3,6 +3,7 @@ from flask_expects_json import expects_json
 from pysis import IsisPool
 from pysis.exceptions import ProcessError
 
+from ..ISISCommand import ISISCommand
 from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
@@ -23,14 +24,8 @@ def post_mro_ctx_2_isis():
     error = None
 
     try:
-        with IsisPool() as isis:
-            for file in isis_request.input_files:
-                logger.debug("Running {}...".format(CMD_NAME))
-                isis.mroctx2isis(
-                    from_=file.input_target,
-                    to=file.output_target
-                )
-                logger.debug("{} complete: {}".format(CMD_NAME, file.output_target))
+        mroctx2isis = ISISCommand(CMD_NAME)
+        mroctx2isis.run(*isis_request.input_files)
 
         output_files = isis_request.upload_output()
 

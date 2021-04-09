@@ -3,6 +3,7 @@ from flask_expects_json import expects_json
 from pysis import IsisPool
 from pysis.exceptions import ProcessError
 
+from ..ISISCommand import ISISCommand
 from ..ISISRequest import ISISRequest
 from ..input_validation import get_json_schema
 from ..logger import get_logger
@@ -23,14 +24,8 @@ def post_ctx_even_odd():
     error = None
 
     try:
-        logger.debug("Running {}...".format(CMD_NAME))
-        with IsisPool() as isis:
-            for file in isis_request.input_files:
-                isis.ctxevenodd(
-                    from_=file.input_target,
-                    to=file.output_target
-                )
-        logger.debug("{} complete".format(CMD_NAME))
+        ctxevenodd = ISISCommand(CMD_NAME)
+        ctxevenodd.run(*isis_request.input_files)
 
         output_files = isis_request.upload_output()
 
