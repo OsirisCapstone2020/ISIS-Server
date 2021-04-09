@@ -6,3 +6,4 @@
 .env
 *.prt
 data/
+.python/

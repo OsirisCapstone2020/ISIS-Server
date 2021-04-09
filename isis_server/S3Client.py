@@ -119,7 +119,11 @@ class S3Client:
             }
 
             if public:
-                copy_args["ACL"] = "public-read"
+                copy_args["ExtraArgs"] = {
+                    "Metadata": {
+                        "public": "true"
+                    }
+                }
 
             self.s3.copy_object(**copy_args)
 
