@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import request, jsonify, current_app
 from flask_expects_json import expects_json
 
-from ..config import Config
+from ..Config import Config
 from ..input_validation import get_json_schema
 from ..logger import get_logger
 

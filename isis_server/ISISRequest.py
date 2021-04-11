@@ -1,10 +1,10 @@
 from typing import List
 
 from flask import Request, current_app
-from os.path import splitext, basename
+from os.path import splitext, basename, exists as path_exists
 
 from .S3Client import S3File
-from .utils import Utils
+from .Utils import Utils
 
 
 class ISISInputFile:
@@ -38,9 +38,10 @@ class ISISRequest:
 
     def upload_output(self):
         output_files = list()
-        for input_file in self.input_files:
-            output_file = S3File(input_file.output_target, input_file.tags)
-            output_files.append(output_file)
+        for isis_file in self.input_files:
+            if path_exists(isis_file.output_target):
+                output_file = S3File(isis_file.output_target, isis_file.tags)
+                output_files.append(output_file)
         return current_app.s3_client.multi_upload(output_files)
 
     def cleanup(self):

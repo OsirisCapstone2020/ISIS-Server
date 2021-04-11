@@ -3,4 +3,4 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from .app import app
-from .config import Config
+from .Config import Config

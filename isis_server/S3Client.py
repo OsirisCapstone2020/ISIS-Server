@@ -3,16 +3,17 @@ from typing import List
 
 from boto3 import client as s3_client, set_stream_logger as set_boto3_logger
 from botocore.config import Config as S3Config
+from boto3.s3.transfer import TransferConfig
 from logging import getLogger, StreamHandler, WARN
 from sys import stdout
 from os import path
 
-from .config import Config
+from .Config import Config
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlencode
 
-from .utils import Utils
+from .Utils import Utils
 
 set_boto3_logger("", level=WARN)
 s3_logger = getLogger("s3")
@@ -35,6 +36,7 @@ class S3Client:
             aws_secret_access_key=Config.s3.secret_key,
             config=S3Config(connect_timeout=300, read_timeout=300)
         )
+        self._transfer_config = TransferConfig(use_threads=False)
 
     def download(self, object_name: str) -> S3File:
         """
@@ -51,7 +53,8 @@ class S3Client:
                 self.s3.download_fileobj(
                     Config.s3.bucket,
                     object_name,
-                    temp_file
+                    temp_file,
+                    Config=self._transfer_config
                 )
 
             s3_logger.info(
@@ -83,7 +86,8 @@ class S3Client:
             self.s3.upload_file(
                 s3_file.path,
                 Config.s3.bucket,
-                object_name
+                object_name,
+                Config=self._transfer_config
             )
 
             if len(s3_file.tags.keys()) > 0:

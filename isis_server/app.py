@@ -1,10 +1,10 @@
 from flask import Flask
 
+from .routes import get_command, get_all_commands, post_start, post_cog, \
+    post_email
+from .routes.isis import post_spiceinit, post_mro_ctx_2_isis, post_ctx_cal, \
+    post_ctx_even_odd, post_cam_2_map, post_isis_2_std
 from .xml_reader import XMLReader
-from .routes import post_start, post_spiceinit, get_all_commands, get_command, \
-    post_mro_ctx_2_isis, post_ctx_cal, post_ctx_even_odd,\
-    post_cam_2_map, post_isis_2_std, post_cog
-from .routes.email import post_email
 from .S3Client import S3Client
 from os import path, listdir
 

@@ -1,9 +1,5 @@
 from os import getenv
 from logging import getLevelName
-from tempfile import gettempdir
-from datetime import datetime
-from os.path import join as path_join, exists as path_exists
-from os import remove as remove_file
 
 
 def check_env_exists(env_var: str) -> str:

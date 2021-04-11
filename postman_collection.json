@@ -1,0 +1,257 @@
+{
+	"info": {
+		"_postman_id": "003eec1f-f76e-4b86-96f9-76d2e36fbf6f",
+		"name": "posts",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "start",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"https://pdsimage2.wr.usgs.gov/Missions/Mars_Reconnaissance_Orbiter/CTX/mrox_0674/data/P22_009808_1813_XN_01N214W.IMG\",\n        \"https://pdsimage2.wr.usgs.gov/Missions/Mars_Reconnaissance_Orbiter/CTX/mrox_0674/data/P22_009821_2196_XN_39N216W.IMG\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/start",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mroctx2isis",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"ddba6f81-418c-46ad-9abc-f24b88c75b98.img\",\n        \"2bf4c09d-ecc1-4ec3-b566-9efcc05d5723.img\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/mroctx2isis",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"mroctx2isis"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "spiceinit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"ddafc0dd-4896-468a-af48-4c8d37479be7.cub\",\n        \"8c826465-a383-41a1-9df2-d6c41f6d3e93.cub\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/spiceinit",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"spiceinit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ctxcal",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"5f7ed8ca-9153-443b-9af2-2d22489b7e42.cub\",\n        \"01b583ec-b906-4abb-aa4f-023c8c59a34d.cub\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/ctxcal",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"ctxcal"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ctxevenodd",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"5f7ed8ca-9153-443b-9af2-2d22489b7e42.cub\",\n        \"01b583ec-b906-4abb-aa4f-023c8c59a34d.cub\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/ctxevenodd",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"ctxevenodd"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cam2map",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"4e594c86-d252-4f08-ac19-a83a8126a543.cub\",\n        \"a853d93c-d167-43b4-b190-4f578a8141c9.cub\"\n    ],\n    \"args\": {\n        \"projection\": \"simplecylindrical\",\n        \"extra_args\": {\n            \"args\": [\n                {\n                    \"arg_key\": \"clon\",\n                    \"arg_val\": 0.0\n                }\n            ]\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/cam2map",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"cam2map"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "isis2std",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"4e594c86-d252-4f08-ac19-a83a8126a543.cub\",\n        \"a853d93c-d167-43b4-b190-4f578a8141c9.cub\"\n    ],\n    \"args\": {\n        \"file_type\": \"tif\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/isis2std",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"isis2std"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cog",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"from\": [\n        \"12573ae2-24c6-43a2-9352-efeb6d3380a3.tif\",\n        \"bee69e35-dd16-41a9-b795-cdb8d819c1e9.tif\"\n    ],\n    \"args\": {}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8080/cog",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"cog"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

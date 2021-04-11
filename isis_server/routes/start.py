@@ -12,7 +12,7 @@ from ..ISISRequest import ISISInputFile
 from ..S3Client import S3File
 from ..input_validation import get_json_schema
 from ..logger import get_logger
-from ..utils import Utils
+from ..Utils import Utils
 
 READ_CHUNK_SZ = 8192
 
